@@ -1,39 +1,104 @@
+"use client";
+
+import { ChangeEvent, useState } from "react";
+import { TARGET_CHAINS } from "../lib";
+
 export default function Create() {
-  return (
-    <main className="flex min-h-screen flex-col items-center p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <a
-          href="/"
-          className="fixed left-0 top-0 flex w-full justify-center  bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl  dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30"
-        >
-          Multichain Deploy
-        </a>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none"></div>
-      </div>
+  const [project, setProject] = useState("");
+  const [selectedChains, setSelectedChains] = useState(new Set());
+  const [step, setStep] = useState(1);
 
-      <div className="mb-32 grid text-left lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-2">
-        <div className="group rounded-lg border border-transparent px-5 py-4 font-serif transition-colors">
-          <p className="text-xl">Deploy anywhere</p>
-          <ul className="list-inside list-disc">
-            <li>One transaction</li>
-            <li>Pay gas with one token on one chain</li>
-            <li>Trust deployments with Mask.ID</li>
-            <li>Collaborate with a team</li>
-          </ul>
-        </div>
+  const onProjectChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setProject(e.currentTarget.value || "");
+  };
 
-        <button className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30">
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Get started{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Connect with Mask for coolness
-          </p>
-        </button>
+  const processName = () => {
+    if (project.length === 0) return;
+
+    setStep(2);
+  };
+
+  const editName = () => {
+    setStep(1);
+  };
+
+  const chainToggled = (chainId: string) => {
+    const newSelections = new Set(selectedChains);
+    const wasSelected = selectedChains.has(chainId);
+    if (wasSelected) {
+      newSelections.delete(chainId);
+    } else {
+      newSelections.add(chainId);
+    }
+    setSelectedChains(newSelections);
+  };
+
+  const chainSelector = (chainId: string) => {
+    const chain = TARGET_CHAINS[chainId];
+    const isSelected = selectedChains.has(chainId);
+    return (
+      <div key={chainId} onClick={() => chainToggled(chainId)}>
+        <input
+          type="checkbox"
+          className="h-6 w-6"
+          checked={isSelected}
+          readOnly
+        />
+        <span className="ml-4 text-xl">
+          {chain.name} ({chainId})
+        </span>
       </div>
-    </main>
-  );
+    );
+  };
+
+  const renderStep = () => {
+    switch (step) {
+      case 2:
+        return (
+          <div className="space-y-12">
+            <p className="text-xl">Select chains to deploy to:</p>
+            <div className="space-y-2">
+              {Object.keys(TARGET_CHAINS).map((chainId) =>
+                chainSelector(chainId),
+              )}
+            </div>
+
+            <div className="flex flex-col space-y-4">
+              <button className="rounded-md bg-purple-300 p-6">
+                Create project
+              </button>
+              <button onClick={editName} className="text-sm text-cyan-400">
+                &lt; Edit name ({project})
+              </button>
+            </div>
+          </div>
+        );
+      default:
+        return (
+          <form onSubmit={processName}>
+            <div className="flex flex-col space-y-4">
+              <input
+                className="w-full rounded-md px-3 py-6 text-xl text-black"
+                type="text"
+                value={project}
+                placeholder="Project name"
+                onChange={onProjectChange}
+                autoFocus
+              />
+              <button
+                onClick={processName}
+                className="rounded-md bg-purple-300 px-6 py-6"
+                type="submit"
+              >
+                Next &gt;
+              </button>
+            </div>
+          </form>
+        );
+    }
+  };
+
+  return <div className="mt-24 w-full">{renderStep()}</div>;
 }

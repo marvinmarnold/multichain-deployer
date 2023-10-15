@@ -22,7 +22,6 @@ export default function Home() {
 
   const connectWallet = () => {
     setConnectClicked(true);
-    console.log("connecting to wallet");
     openConnectModal && openConnectModal();
   };
 

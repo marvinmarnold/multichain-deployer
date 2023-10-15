@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./navbar";
+import { WalletProvider } from "./wallet-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,10 +19,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <main className="flex min-h-screen flex-col items-center px-24 py-20">
-          <Navbar />
-          {children}
-        </main>
+        <WalletProvider>
+          <main className="flex min-h-screen flex-col items-center px-24 py-20">
+            <Navbar />
+            {children}
+          </main>
+        </WalletProvider>
       </body>
     </html>
   );

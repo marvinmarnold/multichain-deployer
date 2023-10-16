@@ -1,12 +1,18 @@
 "use client";
 
-import { ChangeEvent, useState } from "react";
+import { redirect } from "next/navigation";
+import { ChangeEvent, useEffect, useState } from "react";
 import { TARGET_CHAINS } from "../lib";
 
 export default function Create() {
   const [project, setProject] = useState("");
   const [selectedChains, setSelectedChains] = useState(new Set());
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    console.log("deploy it");
+    if (step === 3) redirect("/deploy");
+  }, [step]);
 
   const onProjectChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -55,6 +61,8 @@ export default function Create() {
 
   const renderStep = () => {
     switch (step) {
+      case 3:
+        return <p>Redirecting</p>;
       case 2:
         return (
           <div className="space-y-12">
@@ -66,7 +74,12 @@ export default function Create() {
             </div>
 
             <div className="flex flex-col space-y-4">
-              <button className="rounded-md bg-purple-300 p-6">
+              <button
+                className="rounded-md bg-purple-300 p-6"
+                onClick={() => {
+                  setStep(3);
+                }}
+              >
                 Create project
               </button>
               <button onClick={editName} className="text-sm text-cyan-400">

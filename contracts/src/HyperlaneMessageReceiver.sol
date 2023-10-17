@@ -4,7 +4,8 @@ pragma solidity ^0.8.9;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-import "./IMailbox.sol";
+import "./interfaces/IMailbox.sol";
+
 contract HyperlaneMessageReceiver {
     IMailbox inbox;
     bytes32 public lastSender;
@@ -12,7 +13,6 @@ contract HyperlaneMessageReceiver {
 
     event ReceivedMessage(uint32 origin, bytes32 sender, bytes message);
 
-    
     constructor(address _inbox) {
         inbox = IMailbox(_inbox);
     }
@@ -22,8 +22,8 @@ contract HyperlaneMessageReceiver {
         bytes32 _sender,
         bytes calldata _message
     ) external {
-      lastSender = _sender;
-      lastMessage = string(_message);
-      emit ReceivedMessage(_origin, _sender, _message);
+        lastSender = _sender;
+        lastMessage = string(_message);
+        emit ReceivedMessage(_origin, _sender, _message);
     }
 }

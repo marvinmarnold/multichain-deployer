@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getDeployTx, getDeployedAddress, getGasEstimate } from "../deploy";
+import { request, gql } from 'graphql-request'
 
 export default function Create() {
   const [salt, setSalt] = useState(0);
@@ -9,6 +10,58 @@ export default function Create() {
   const [deployTx, setDeployTx] = useState<{ to: string; data: string }>();
   const [gas, setGas] = useState<number>();
   const [targetAddress, setTargetAddress] = useState<string>();
+  const [userData, setUserData] = useState<Object[]>([]);
+
+  interface Data {
+    identity: {
+      platform: string;
+      identity: string;
+      displayName: string | null;
+      neighbor: IdentityWithSource[];
+    };
+  }
+
+  interface IdentityRecord {
+    platform: string | null;
+    identity: string;
+    displayName?: string | null;
+    neighbor?: IdentityWithSource[] | null;
+  }
+
+  interface IdentityWithSource {
+    identity: IdentityRecord;
+  }
+
+  useEffect(() => {
+    
+    const getUserData = async (userAddress : string) => {
+      
+      const document = gql`
+      {
+        identity(platform: "ethereum", identity: "${userAddress}") {
+          platform
+          identity
+          displayName
+          # Here we perform a 3-depth deep search for this identity's "neighbor".
+          neighbor(depth: 3) {
+            # sources # Which upstreams provide these connection infos.
+            identity {
+              platform
+              identity
+              displayName
+            }
+          }
+        }
+      }
+      `
+      const badgeData : Data = await request('https://relation-service.next.id/graphql/', document);
+      setUserData(badgeData.identity.neighbor);
+    }
+
+    // using this as a sample. we can use deployer's account once we have a next.id enabled account for testing
+    getUserData("0x934b510d4c9103e6a87aef13b816fb080286d649");
+    
+  });
 
   //   const { config, error, isError, isLoading: isPreparing } = usePrepareContractWrite({
   //     abi: "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3" ,
@@ -17,7 +70,7 @@ export default function Create() {
   //     address: import.meta.env.VITE_CONTRACT_DEPLOYER_MUMBAI,
   //     args: [0, bytecode],
   // })
-
+  
   const onFileChanged = (event: any) => {
     const file = event.target.files[0];
 
@@ -47,11 +100,23 @@ export default function Create() {
     switch (step) {
       case 2:
         return (
+        <div>
+          <div>
+          <h1> multiple platforms: 
+            {
+              userData.map((ele : Object) => 
+                <div key={ele?.identity}>
+                  <p>{JSON.stringify(ele?.identity?.platform)}</p>
+                </div>
+              )
+            }</h1>
+          </div>
           <div className="space-y-12">
             <p className="text-xl">
               Contract will be deployed to: {targetAddress}
             </p>
           </div>
+        </div>
         );
       default:
         return (

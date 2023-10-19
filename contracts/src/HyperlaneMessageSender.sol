@@ -35,15 +35,7 @@ contract HyperlaneMessageSender is Ownable {
     error InvalidAddress(address addr);
     error ChainNotSupported(uint256 chainId);
 
-    // Modifiers
-    modifier equalLengthArrays(uint256 len1, uint256 len2) {
-        if (len1 != len2) {
-            revert DifferentLengthArrays(len1, len2);
-        }
-        _;
-    }
-
-    constructor(address _outbox, address _gasPayer) {
+    constructor(address _outbox, address _gasPayer) Ownable(msg.sender) {
         if (_outbox == address(0)) {
             revert InvalidAddress(_outbox);
         }
@@ -77,11 +69,18 @@ contract HyperlaneMessageSender is Ownable {
     function getQuoteForMultipleChains(
         uint32[] calldata _destinationDomain,
         uint256[] calldata _gasAmount
-    ) public view equalLengthArrays returns (uint256) {
+    ) public view returns (uint256) {
+        if (_destinationDomain.length != _gasAmount.length) {
+            revert DifferentLengthArrays(
+                _destinationDomain.length,
+                _gasAmount.length
+            );
+        }
+
         uint256 total = 0;
         for (uint256 i = 0; i < _destinationDomain.length; i++) {
-            if (!supportedChains[_destinationDomain]) {
-                revert ChainNotSupported(_destinationDomain);
+            if (!supportedChains[_destinationDomain[i]]) {
+                revert ChainNotSupported(_destinationDomain[i]);
             }
             total += igp.quoteGasPayment(_destinationDomain[i], _gasAmount[i]);
         }
@@ -126,7 +125,14 @@ contract HyperlaneMessageSender is Ownable {
         uint256[] calldata _gasAmount,
         bytes32 _recipient,
         bytes calldata _message
-    ) external payable equalLengthArrays {
+    ) external payable {
+        if (_destinationDomain.length != _gasAmount.length) {
+            revert DifferentLengthArrays(
+                _destinationDomain.length,
+                _gasAmount.length
+            );
+        }
+
         uint256 totalRequiredGas = 0;
         uint256[] memory gasAmountAfterQuote = new uint256[](
             _destinationDomain.length

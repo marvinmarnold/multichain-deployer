@@ -2,7 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { getDeployTx, getDeployedAddress, getGasEstimate } from "../deploy";
-import { request, gql } from 'graphql-request'
+import { Data, IdentityRecord, IdentityWithSource, DataSource, Platform } from '../types/nextid';
+import Image from 'next/image';
+import { unknown, lens, github, ethereum, nextid, space_id, twitter, keybase, reddit, farcaster, sybil, notSybil } from "./imports";
+import { element } from "@rainbow-me/rainbowkit/dist/css/reset.css";
+
 
 export default function Create() {
   const [salt, setSalt] = useState(0);
@@ -10,58 +14,55 @@ export default function Create() {
   const [deployTx, setDeployTx] = useState<{ to: string; data: string }>();
   const [gas, setGas] = useState<number>();
   const [targetAddress, setTargetAddress] = useState<string>();
-  const [userData, setUserData] = useState<Object[]>([]);
+  const [identities, setIdentities] = useState<IdentityWithSource[]>([]);
+  const walletAddress = "0x934b510d4c9103e6a87aef13b816fb080286d649";
 
-  interface Data {
-    identity: {
-      platform: string;
-      identity: string;
-      displayName: string | null;
-      neighbor: IdentityWithSource[];
-    };
+  const convertToVar = (name:string) => {
+
+    if (name == "twitter") return twitter;
+    else if (name == "farcaster") return farcaster;
+    else if (name == "ethereum") return ethereum;
+    else if (name == "lens") return lens;
+    else if (name == "keybase") return keybase;
+    else if (name == "nextid") return nextid;
+    else if (name == "space_id") return space_id;
+    else if (name == "reddit") return reddit;
+    else if (name == "github") return github;
+    else return unknown;
+
   }
 
-  interface IdentityRecord {
-    platform: string | null;
-    identity: string;
-    displayName?: string | null;
-    neighbor?: IdentityWithSource[] | null;
-  }
-
-  interface IdentityWithSource {
-    identity: IdentityRecord;
+  const sybilCheck = () => {
+    let isSybil = 0;
+    identities.forEach(identity => {
+      identity.sources?.forEach(syb => {
+        if (syb === "sybil") {isSybil = 1;}
+      })
+    });
+    return isSybil == 1 ? sybil : notSybil;
   }
 
   useEffect(() => {
-    
-    const getUserData = async (userAddress : string) => {
-      
-      const document = gql`
-      {
-        identity(platform: "ethereum", identity: "${userAddress}") {
-          platform
-          identity
-          displayName
-          # Here we perform a 3-depth deep search for this identity's "neighbor".
-          neighbor(depth: 3) {
-            # sources # Which upstreams provide these connection infos.
-            identity {
-              platform
-              identity
-              displayName
-            }
-          }
-        }
-      }
-      `
-      const badgeData : Data = await request('https://relation-service.next.id/graphql/', document);
-      setUserData(badgeData.identity.neighbor);
-    }
 
-    // using this as a sample. we can use deployer's account once we have a next.id enabled account for testing
-    getUserData("0x934b510d4c9103e6a87aef13b816fb080286d649");
-    
-  });
+    // make an api request to /api/test to fetch the userdata
+    const getIdentities = async () => {
+      
+      const customerdata = await fetch('/api/nextid', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ address: walletAddress }),
+      });
+      
+      const identities: IdentityWithSource[] = await customerdata.json();
+      setIdentities(identities);
+      console.log("fetched identities");
+      // console.log(identities);
+      
+    }
+    getIdentities();
+  }, []);
 
   //   const { config, error, isError, isLoading: isPreparing } = usePrepareContractWrite({
   //     abi: "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3" ,
@@ -102,14 +103,23 @@ export default function Create() {
         return (
         <div>
           <div>
-          <h1> multiple platforms: 
-            {
-              userData.map((ele : Object) => 
-                <div key={ele?.identity}>
-                  <p>{JSON.stringify(ele?.identity?.platform)}</p>
-                </div>
-              )
-            }</h1>
+            Sybil: 
+            <Image src= { sybilCheck() } height={30} width={30} alt="sybil check" />
+            
+            <h1> 
+              Platforms: 
+              {
+                identities.map((ele: IdentityWithSource) => 
+                  <div key={ele?.identity.uuid}>
+                    <div>
+                      {/* <p> sources: {JSON.stringify(ele?.sources)} </p> */}
+                      {ele?.identity?.platform}
+                      <div><Image src= { convertToVar(ele?.identity?.platform) } height={24} width={24} alt="nextIimge" /></div>
+                    </div>
+                  </div>
+                )
+              }
+            </h1>
           </div>
           <div className="space-y-12">
             <p className="text-xl">

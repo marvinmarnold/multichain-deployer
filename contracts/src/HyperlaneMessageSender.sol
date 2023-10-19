@@ -11,6 +11,9 @@ contract HyperlaneMessageSender {
     IMailbox outbox;
     IInterchainGasPaymaster igp;
 
+    // Supported Chains
+    mapping(uint32 => bool) public supportedChains;
+
     // Events
     event DispatchMessage(
         uint32 destinationDomains,

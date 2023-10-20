@@ -3,6 +3,7 @@ pragma solidity ^0.8.9;
 
 import "forge-std/Test.sol";
 import "../src/HyperlaneMessageSender.sol";
+import "./helper/Counter.sol";
 
 contract HyperlaneMessageSenderTest is Test {
     address public owner;
@@ -67,9 +68,38 @@ contract HyperlaneMessageSenderTest is Test {
         senderContract.addSupportedChain(137);
 
         uint256 quote = senderContract.getQuote(137, 100);
+        assertGt(quote, 100, "Quote should be 100");
+    }
 
-        // emit log_named_uint("quote", quote);
+    function testDispach() public {
+        vm.selectFork(mainnetFork);
+        assertEq(vm.activeFork(), mainnetFork);
 
-        assertGt(quote, 100, "Quote should be 200000");
+        vm.deal(owner, 10 ether);
+        vm.startPrank(owner);
+
+        senderContract = new HyperlaneMessageSender(mailAddress, igpAddress);
+
+        senderContract.addSupportedChain(1);
+        senderContract.addSupportedChain(137);
+
+        uint256 quote = senderContract.getQuote(137, 100000);
+        assertGt(quote, 100000, "Quote should be 10000");
+
+        Counter counter = new Counter();
+        bytes memory userContract = address(counter).code;
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, keccak256(userContract));
+        bytes memory message = abi.encodePacked(
+            addr1,
+            abi.encodePacked(r, s, v),
+            userContract
+        );
+
+        senderContract.dispatch{value: quote}(
+            137,
+            100000,
+            bytes32(uint256(uint160(addr1)) << 96),
+            message
+        );
     }
 }

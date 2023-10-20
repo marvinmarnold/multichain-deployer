@@ -6,8 +6,8 @@ pragma solidity ^0.8.9;
 
 import "./IMailbox.sol";
 import "./IInterchainGasPaymaster.sol";
-
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "forge-std/console.sol";
 
 contract HyperlaneMessageSender is Ownable {
     IMailbox outbox;
@@ -62,6 +62,10 @@ contract HyperlaneMessageSender is Ownable {
         if (!supportedChains[_destinationDomain]) {
             revert ChainNotSupported(_destinationDomain);
         }
+        console.logString("--------------> getQuote");
+        console.logUint(_destinationDomain);
+        console.logUint(_gasAmount);
+        console.logString("--------------> getQuote");
 
         return igp.quoteGasPayment(_destinationDomain, _gasAmount);
     }
@@ -97,21 +101,12 @@ contract HyperlaneMessageSender is Ownable {
             revert ChainNotSupported(_destinationDomain);
         }
 
-        uint256 requiredGas = igp.quoteGasPayment(
-            _destinationDomain,
-            _gasAmount
-        );
-
-        if (requiredGas > msg.value) {
-            revert InsufficientGas(requiredGas, msg.value);
-        }
-
         bytes32 messageId = outbox.dispatch(
             _destinationDomain,
             _recipient,
             _message
         );
-        igp.payForGas{value: msg.value}(
+        igp.payForGas(
             messageId, // The ID of the message that was just dispatched
             _destinationDomain, // The destination domain of the message
             _gasAmount, // 100k gas to use in the recipient's handle function

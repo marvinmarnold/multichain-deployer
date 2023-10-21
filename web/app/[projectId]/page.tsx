@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { getDeployTx, getDeployedAddress, getGasEstimate } from "../deploy";
+import NextidBadges from "./NextidBadges";
+
 
 export default function Create() {
   const [salt, setSalt] = useState(0);
@@ -17,7 +19,7 @@ export default function Create() {
   //     address: import.meta.env.VITE_CONTRACT_DEPLOYER_MUMBAI,
   //     args: [0, bytecode],
   // })
-
+  
   const onFileChanged = (event: any) => {
     const file = event.target.files[0];
 
@@ -47,11 +49,16 @@ export default function Create() {
     switch (step) {
       case 2:
         return (
+        <div>
           <div className="space-y-12">
             <p className="text-xl">
               Contract will be deployed to: {targetAddress}
             </p>
           </div>
+          <div>
+          <NextidBadges />
+          </div>
+        </div>
         );
       default:
         return (

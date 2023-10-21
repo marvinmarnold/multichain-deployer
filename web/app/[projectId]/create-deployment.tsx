@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react/no-unescaped-entities */
 
 import { recordDeployment } from "@/app/actions/recordDeployment";
 import { TailSpin } from "react-loading-icons";
@@ -90,6 +91,7 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
 
   const sampleRequestJson = JSON.stringify({ key: project.id, bytecode: "%s" });
 
+  if (!address) return;
   return (
     <>
       <p className="text-center text-2xl">
@@ -98,17 +100,19 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
       {isDeploying ? (
         <div>Deploying</div>
       ) : (
-        <ol className="list-decimal">
+        <ol className="list-decimal text-xl">
           <li>
             Build contract locally:{" "}
             <p>
-              <code>✗ forge build</code>
+              <code className="text-base">✗ forge build</code>
             </p>
           </li>
           <li>
             Upload from terminal:{" "}
-            <pre>✗ BYTECODE_PATH=./out/Contract.sol/Contract.json</pre>
-            <p>
+            <pre className="text-base">
+              ✗ BYTECODE_PATH=./out/Contract.sol/Contract.json
+            </pre>
+            <p className="text-base">
               <code>
                 ✗ BYTECODE=$(jq -r '.bytecode.object' $BYTECODE_PATH | tr -d
                 '\n') printf '{sampleRequestJson}' "$BYTECODE" | curl -XPOST -d
@@ -128,7 +132,7 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
                 />
                 <label
                   htmlFor="fileInput"
-                  className="bg w-full cursor-pointer rounded-lg border-2 border-[#000000] bg-purple-300 px-[5rem] py-[2rem] text-center"
+                  className="bg w-1/3 cursor-pointer rounded-lg border-2 border-[#000000] bg-teal-200 py-2 text-center text-base text-black"
                 >
                   Upload bytecode
                 </label>
@@ -158,10 +162,10 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
                   value={address}
                 />
                 <button
-                  className="flex flex-row rounded-md bg-purple-300 p-6 text-lg"
+                  className="w-full rounded-md bg-purple-300 p-6 text-center text-lg"
                   type="submit"
                 >
-                  Click to deploy #{project.next_salt + 1}
+                  Deploy #{project.next_salt + 1}
                 </button>
               </form>
 
@@ -171,7 +175,7 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
               </div>
             </div>
           ) : (
-            <button className="flex flex-row rounded-md bg-purple-900 p-6 text-lg">
+            <button className="flex w-full flex-row justify-center rounded-md bg-purple-900 p-6 text-lg">
               <TailSpin className="mr-4 w-8" /> Waiting on bytecode...
             </button>
           )}

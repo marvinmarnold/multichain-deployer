@@ -4,8 +4,7 @@ import { Database } from "@tableland/sdk";
 import { ethers } from "ethers";
 import { redirect } from "next/navigation";
 import { v4 as uuidv4 } from "uuid";
-
-const PROJECTS_TABLE = process.env.TABLELAND_PROJECTS_TABLE!;
+import { PROJECTS_TABLE } from "../interfaces/tableland";
 
 const WRITER_SK = process.env.TABLELAND_WRITER_SK!; // Your private key
 // To avoid connecting to the browser wallet (locally, port 8545),

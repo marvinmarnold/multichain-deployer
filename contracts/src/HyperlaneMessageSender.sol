@@ -25,7 +25,7 @@ contract HyperlaneMessageSender is Ownable {
 
     event DispatchMessageForMultipleChains(
         uint32[] destinationDomains,
-        bytes32 recipient,
+        bytes32[] recipient,
         bytes message
     );
 
@@ -62,10 +62,6 @@ contract HyperlaneMessageSender is Ownable {
         if (!supportedChains[_destinationDomain]) {
             revert ChainNotSupported(_destinationDomain);
         }
-        console.logString("--------------> getQuote");
-        console.logUint(_destinationDomain);
-        console.logUint(_gasAmount);
-        console.logString("--------------> getQuote");
 
         return igp.quoteGasPayment(_destinationDomain, _gasAmount);
     }
@@ -101,12 +97,18 @@ contract HyperlaneMessageSender is Ownable {
             revert ChainNotSupported(_destinationDomain);
         }
 
+        uint256 gasToPay = igp.quoteGasPayment(_destinationDomain, _gasAmount);
+        if (gasToPay > msg.value) {
+            revert InsufficientGas(gasToPay, msg.value);
+        }
+
         bytes32 messageId = outbox.dispatch(
             _destinationDomain,
             _recipient,
             _message
         );
-        igp.payForGas(
+
+        igp.payForGas{value: msg.value}(
             messageId, // The ID of the message that was just dispatched
             _destinationDomain, // The destination domain of the message
             _gasAmount, // 100k gas to use in the recipient's handle function
@@ -118,7 +120,7 @@ contract HyperlaneMessageSender is Ownable {
     function dispatchForMultipleChains(
         uint32[] calldata _destinationDomain,
         uint256[] calldata _gasAmount,
-        bytes32 _recipient,
+        bytes32[] calldata _recipient,
         bytes calldata _message
     ) external payable {
         if (_destinationDomain.length != _gasAmount.length) {
@@ -147,7 +149,7 @@ contract HyperlaneMessageSender is Ownable {
         for (uint256 i = 0; i < _destinationDomain.length; i++) {
             bytes32 messageId = outbox.dispatch(
                 _destinationDomain[i],
-                _recipient,
+                _recipient[i],
                 _message
             );
             igp.payForGas{value: gasAmountAfterQuote[i]}(

@@ -1,80 +1,50 @@
-"use client";
+import { Database } from "@tableland/sdk";
+import {
+  DEPLOYMENTS_TABLE,
+  IDeploymentSchema,
+  IProjectSchema,
+} from "../interfaces/tableland";
+import CreateDeployment from "./create-deployment";
+import Deployments from "./deployment-history";
+import ProjectInfo from "./project-info";
 
-import { useState } from "react";
-import { getDeployTx, getDeployedAddress, getGasEstimate } from "../deploy";
+const projectDb: Database<IProjectSchema> = new Database();
+const deploymentDb: Database<IDeploymentSchema> = new Database();
+const PROJECTS_TABLE = process.env.NEXT_PUBLIC_TABLELAND_PROJECTS_TABLE!;
+export const revalidate = 0;
 
-export default function Create() {
-  const [salt, setSalt] = useState(0);
-  const [step, setStep] = useState(1);
-  const [deployTx, setDeployTx] = useState<{ to: string; data: string }>();
-  const [gas, setGas] = useState<number>();
-  const [targetAddress, setTargetAddress] = useState<string>();
+export default async function ProjectPage({
+  params,
+}: {
+  params: { projectId: string };
+}) {
+  const { results: projectResults } = await projectDb
+    .prepare(
+      `SELECT * FROM ${PROJECTS_TABLE} WHERE id = '${params.projectId}';`,
+    )
+    .all();
 
-  //   const { config, error, isError, isLoading: isPreparing } = usePrepareContractWrite({
-  //     abi: "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf3" ,
-  //     enabled: !!bytecode,
-  //     functionName: 'performCreate',
-  //     address: import.meta.env.VITE_CONTRACT_DEPLOYER_MUMBAI,
-  //     args: [0, bytecode],
-  // })
+  const project = projectResults[0];
+  console.log(project);
 
-  const onFileChanged = (event: any) => {
-    const file = event.target.files[0];
+  const { results: deploymentResults } = await deploymentDb
+    .prepare(
+      `SELECT * FROM ${DEPLOYMENTS_TABLE} WHERE project_id = '${params.projectId}' ORDER BY deployment_salt desc;`,
+    )
+    .all();
 
-    if (file && file.type === "application/json") {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        console.log("Processing file");
-        const content = JSON.parse(e.target!.result as string);
-        const initCode = content.bytecode.object;
-        console.log("Parsed initCode");
-        setDeployTx(getDeployTx(initCode, salt));
-        setStep(2);
-        setGas(getGasEstimate(initCode));
-        setTargetAddress(getDeployedAddress(initCode, salt));
-
-        // save bytecode to state
-        // setBytecode(content.bytecode.object)
-        // setUploaded(true)
-      };
-      reader.readAsText(file);
-    } else {
-      alert("File must be valid JSON, outputted from forge build.");
-    }
-  };
-
-  const renderStep = () => {
-    switch (step) {
-      case 2:
-        return (
-          <div className="space-y-12">
-            <p className="text-xl">
-              Contract will be deployed to: {targetAddress}
-            </p>
-          </div>
-        );
-      default:
-        return (
-          <form>
-            <div className="flex flex-col space-y-4">
-              <input
-                id="fileInput"
-                type="file"
-                accept=".json"
-                onChange={onFileChanged}
-                className="hidden"
-              />
-              <label
-                htmlFor="fileInput"
-                className="w-full rounded-lg border-2 border-[#000000] px-[5rem] py-[2rem] text-center"
-              >
-                Upload bytecode
-              </label>
-            </div>
-          </form>
-        );
-    }
-  };
-
-  return <div className="mt-24 w-full">{renderStep()}</div>;
+  console.log(deploymentResults);
+  return (
+    <div className="mt-24 w-full space-y-6">
+      {!!project ? (
+        <>
+          <ProjectInfo project={project} />
+          <CreateDeployment project={project} />
+          <Deployments deployments={deploymentResults} />{" "}
+        </>
+      ) : (
+        <p>Loading</p>
+      )}
+    </div>
+  );
 }

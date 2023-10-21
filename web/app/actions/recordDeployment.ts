@@ -22,7 +22,13 @@ export async function recordDeployment(formData: FormData) {
   const deploymentSalt = parseInt(
     formData.get("deploymentSalt")?.toString() || "0",
   );
+  const createdAtMilis = parseInt(
+    formData.get("createdAtMilis")?.toString() || "0",
+  );
+  console.log("Created at " + createdAtMilis);
   const deployedBy = formData.get("deployedBy")?.toString();
+  const tx = formData.get("tx")?.toString();
+  const chainIds = formData.get("chainIds")?.toString();
 
   // projects: increase salt, clear next_init_code
   const { meta: resetProject } = await db
@@ -38,9 +44,17 @@ export async function recordDeployment(formData: FormData) {
 
   const id = uuidv4();
 
+  console.log("id: " + id);
+  console.log("projectId: " + projectId);
+  console.log("deploymentSalt: " + deploymentSalt);
+  console.log("deployedBy: " + deployedBy);
+  console.log("createdAtMilis: " + createdAtMilis);
+  console.log("tx: " + tx);
+  console.log("chainIds: " + chainIds);
+
   const { meta: insertDeployment } = await db
     .prepare(
-      `INSERT INTO ${DEPLOYMENTS_TABLE} (id, project_id, deployment_salt, deployed_address, deployed_by, goerli_status, sepolia_status) VALUES (?, ?, ?, ?, ?, ?, ?);`,
+      `INSERT INTO ${DEPLOYMENTS_TABLE} (id, project_id, deployment_salt, deployed_address, deployed_by, created_at_milis, tx, chain_ids) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
     )
     .bind(
       id,
@@ -48,13 +62,13 @@ export async function recordDeployment(formData: FormData) {
       deploymentSalt,
       "todo",
       deployedBy,
-      "deploying",
-      "omitted",
+      createdAtMilis,
+      tx,
+      chainIds,
     )
     .run();
 
   console.log(insertDeployment.txn);
   console.log("Recorded deployment");
   revalidatePath(`/${projectId}`);
-  // deployments: id, project_id, deployment_salt, deployed_address, deployed_by, goerli_status
 }

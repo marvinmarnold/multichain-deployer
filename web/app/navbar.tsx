@@ -1,11 +1,14 @@
 "use client";
 
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 export default function Navbar() {
   const { address, connector, isConnected } = useAccount();
-  const [displayAddress, setDisplayAddress] = useState("Logged out");
+  const [displayAddress, setDisplayAddress] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (!!address) setDisplayAddress("Deploying as: " + address);
@@ -20,7 +23,7 @@ export default function Navbar() {
         Multichain Deploy
       </a>
       <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-        {displayAddress}
+        {displayAddress ?? <ConnectButton />}
       </div>
     </div>
   );

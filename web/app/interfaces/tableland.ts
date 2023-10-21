@@ -11,8 +11,9 @@ export interface IDeploymentSchema {
   deployed_address: string;
   deployed_by: string;
   deployment_salt: number;
-  goerli_status: string;
-  sepolia_status: string;
+  created_at_milis: number;
+  chain_ids: number[];
+  tx: string;
 }
 
 export const PROJECTS_TABLE = process.env.NEXT_PUBLIC_TABLELAND_PROJECTS_TABLE!;

@@ -1,20 +1,28 @@
 "use client";
 
+import moment from "moment";
 import { FC } from "react";
 import { IDeploymentSchema } from "../interfaces/tableland";
+import { TARGET_CHAINS } from "../lib";
 
 type IDeploymentsProps = {
   deployments: IDeploymentSchema[];
 };
 
 const Deployment: FC<IDeploymentSchema> = (deployment) => {
+  const chains = deployment.chain_ids
+    .sort()
+    .map((chainId) => {
+      return TARGET_CHAINS[chainId].name;
+    })
+    .join(", ");
   return (
-    <tr key={deployment.id}>
+    <tr key={deployment.id} className="font-mono">
       <td>{deployment.deployment_salt + 1}</td>
-      <td>{deployment.deployed_by}</td>
+      <td>{moment(deployment.created_at_milis).fromNow()}</td>
       <td>{deployment.deployed_address}</td>
-      <td>{deployment.goerli_status}</td>
-      <td>{deployment.sepolia_status}</td>
+      <td>{deployment.deployed_by}</td>
+      <td>{chains}</td>
     </tr>
   );
 };
@@ -23,17 +31,20 @@ const Deployments: FC<IDeploymentsProps> = ({ deployments }) => {
   return (
     <div className="w-full">
       <p className="text-center text-2xl">Deployment History</p>
-      <table className="w-full table-auto">
+      <table className="mt-8 w-full table-auto text-left">
         <thead>
-          <tr>
+          <tr className="font-serif">
             <th>#</th>
-            <th>Deployer</th>
+            <th>Deployed at</th>
             <th>Address</th>
-            <th>Goerli</th>
-            <th>Sepolia</th>
+            <th>Deployer</th>
+            <th>Chains</th>
+            <th>Tx</th>
           </tr>
         </thead>
-        <tbody>{deployments.map(Deployment)}</tbody>
+        {!!deployments && deployments.length > 0 ? (
+          <tbody>{deployments.map(Deployment)}</tbody>
+        ) : null}
       </table>
     </div>
   );

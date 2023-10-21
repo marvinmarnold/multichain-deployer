@@ -1,9 +1,11 @@
 import { Database } from "@tableland/sdk";
+import { Hearts } from "react-loading-icons";
 import {
   DEPLOYMENTS_TABLE,
   IDeploymentSchema,
   IProjectSchema,
 } from "../interfaces/tableland";
+
 import CreateDeployment from "./create-deployment";
 import Deployments from "./deployment-history";
 import ProjectInfo from "./project-info";
@@ -25,7 +27,6 @@ export default async function ProjectPage({
     .all();
 
   const project = projectResults[0];
-  console.log(project);
 
   const { results: deploymentResults } = await deploymentDb
     .prepare(
@@ -33,9 +34,8 @@ export default async function ProjectPage({
     )
     .all();
 
-  console.log(deploymentResults);
   return (
-    <div className="mt-24 w-full space-y-6">
+    <div className="mt-24 w-full max-w-5xl space-y-6">
       {!!project ? (
         <>
           <ProjectInfo project={project} />
@@ -43,7 +43,11 @@ export default async function ProjectPage({
           <Deployments deployments={deploymentResults} />{" "}
         </>
       ) : (
-        <p>Loading</p>
+        <div className="space-y-6 text-center">
+          <p className="mt-32 text-xl">Loading...</p>
+          <Hearts className="mr-4 w-32" />
+          <p className="text-teal-300">Please refresh now.</p>
+        </div>
       )}
     </div>
   );

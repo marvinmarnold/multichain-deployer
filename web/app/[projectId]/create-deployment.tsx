@@ -2,12 +2,21 @@
 /* eslint-disable react/no-unescaped-entities */
 
 import { recordDeployment } from "@/app/actions/recordDeployment";
-import { TailSpin } from "react-loading-icons";
+import { utils } from "ethers";
+import { Circles, TailSpin } from "react-loading-icons";
 
 import { Database } from "@tableland/sdk";
 import { FC, MutableRefObject, useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
 import { IProjectSchema } from "../interfaces/tableland";
+import { TARGET_CHAINS } from "../lib";
+
+// enum EState {
+//   WAIT_BYTECODE = 'wait_bytecode',
+//   WAIT_CHAINS = 'wait_chains',
+//   READY_TO_DEPLOY = 'ready_to_deploy',
+//   DEPLOYING = 'deploying'
+// }
 
 type IProjectPageProps = { project: IProjectSchema };
 const db: Database<IProjectSchema> = new Database();
@@ -19,10 +28,20 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
     undefined,
   );
   const { address, connector, isConnected } = useAccount();
+  const [safeAddress, setSafeAddress] = useState<string | undefined>(undefined);
   const [isDeploying, setIsDeploying] = useState(false);
   const intervalRef: MutableRefObject<any> = useRef(null);
+  const [selectedChains, setSelectedChains] = useState(new Set());
+  // const [state, setState] = useState(EState.WAIT_BYTECODE)
   const initCodeToDeploy =
     uploadedInitCode ?? project.next_init_code ?? undefined;
+
+  const chainIds = JSON.stringify(
+    Array.from(selectedChains).map((c: any) => parseInt(c)),
+  );
+  useEffect(() => {
+    setSafeAddress(address);
+  }, [address]);
 
   // Poll tableland to see if initcode has been updated
   useEffect(() => {
@@ -58,6 +77,45 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
     };
   }, []); // The empty dependency array means this useEffect runs once when the component mounts, and the cleanup runs when it unmounts
 
+  const chainToggled = (chainId: string) => {
+    const newSelections = new Set(selectedChains);
+    const wasSelected = selectedChains.has(chainId);
+    if (wasSelected) {
+      newSelections.delete(chainId);
+    } else {
+      newSelections.add(chainId);
+    }
+    setSelectedChains(newSelections);
+  };
+
+  const chainSelector = (chainId: string) => {
+    const chain = TARGET_CHAINS[chainId];
+    const isSelected = selectedChains.has(chainId);
+    return (
+      <div
+        key={chainId}
+        onClick={() => chainToggled(chainId)}
+        className="cursor-pointer"
+      >
+        <input
+          type="checkbox"
+          className="h-6 w-6"
+          checked={isSelected}
+          readOnly
+        />
+        <span className="ml-4 text-xl">
+          {chain.name} (
+          <span className="text-teal-300">
+            <a href={`https://chainlist.org/chain/${chainId}`} target="_blank">
+              {chainId}
+            </a>
+          </span>
+          )
+        </span>
+      </div>
+    );
+  };
+
   const onFileChanged = (event: any) => {
     const file = event.target.files[0];
 
@@ -83,6 +141,11 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
 
   const onDeploy = () => {
     setIsDeploying(true);
+    const types = ["address", "bytes", "bytes"];
+    const values = [address, "0x", initCodeToDeploy];
+    const message = utils.defaultAbiCoder.encode(types, values);
+    console.log("Deploying with these");
+    console.log(message);
     setUploadedInitCode(undefined);
     // calculate gas and get predicted address
     // send message to hyperchain
@@ -91,16 +154,20 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
 
   const sampleRequestJson = JSON.stringify({ key: project.id, bytecode: "%s" });
 
-  if (!address) return;
+  const WaitBytecode = () => {};
+
+  if (!safeAddress) return null;
   return (
-    <>
-      <p className="text-center text-2xl">
-        Create Deployment #{project.next_salt + 1}
-      </p>
+    <div>
+      <p className="text-center text-2xl">Deploy Contract</p>
+      <p className="text-center text-sm">version {project.next_salt + 1}</p>
       {isDeploying ? (
-        <div>Deploying</div>
+        <div className="flex flex-row items-center justify-center justify-items-center">
+          <Circles className="mr-4 w-8" />
+          <span className="text-teal-300">Deploying...</span>
+        </div>
       ) : (
-        <ol className="list-decimal text-xl">
+        <ol className="list-decimal space-y-6 text-xl">
           <li>
             Build contract locally:{" "}
             <p>
@@ -139,6 +206,12 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
               </div>
             </form>
           </li>
+          <li>
+            <p>Select chains</p>
+            {Object.keys(TARGET_CHAINS).map((chainId) =>
+              chainSelector(chainId),
+            )}
+          </li>
           <li>Deploy</li>
           {!!initCodeToDeploy ? (
             <div className="space-y-2">
@@ -161,8 +234,21 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
                   name="deployedBy"
                   value={address}
                 />
+                <input
+                  type="hidden"
+                  id="createdAtMilis"
+                  name="createdAtMilis"
+                  value={new Date().getTime()}
+                />
+                <input type="hidden" id="tx" name="tx" value={"0xTTT"} />
+                <input
+                  type="hidden"
+                  id="chainIds"
+                  name="chainIds"
+                  value={chainIds}
+                />
                 <button
-                  className="w-full rounded-md bg-purple-300 p-6 text-center text-lg"
+                  className="w-full rounded-md bg-purple-900 p-6 text-center text-lg"
                   type="submit"
                 >
                   Deploy #{project.next_salt + 1}
@@ -175,13 +261,13 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
               </div>
             </div>
           ) : (
-            <button className="flex w-full flex-row justify-center rounded-md bg-purple-900 p-6 text-lg">
+            <button className="flex w-full cursor-not-allowed flex-row justify-center rounded-md bg-purple-300 p-6 text-lg">
               <TailSpin className="mr-4 w-8" /> Waiting on bytecode...
             </button>
           )}
         </ol>
       )}
-    </>
+    </div>
   );
 };
 

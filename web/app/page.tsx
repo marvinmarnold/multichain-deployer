@@ -60,7 +60,7 @@ export default function Home() {
   );
 
   return (
-    <div className="mb-32 grid text-left lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-2">
+    <div className="mb-32 mt-20 grid text-left lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-2">
       <div className="group rounded-lg border border-transparent px-5 py-4 font-serif transition-colors">
         <p className="mb-4 text-xl">Deploy anywhere</p>
         <ul className="list-inside list-disc space-y-2">
@@ -68,6 +68,8 @@ export default function Home() {
           <li>Pay gas with one token on one chain</li>
           <li>Trust deployments with Mask.ID</li>
           <li>Collaborate with a team</li>
+          <li>Deployment history</li>
+          <li>One address on all chains</li>
         </ul>
       </div>
 

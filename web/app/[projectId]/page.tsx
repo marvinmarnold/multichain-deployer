@@ -43,7 +43,7 @@ export default async function ProjectPage({
           <Deployments deployments={deploymentResults} />{" "}
         </>
       ) : (
-        <div className="space-y-6 text-center">
+        <div className="flex flex-col items-center justify-center space-y-6 text-center">
           <p className="mt-32 text-xl">Loading...</p>
           <Hearts className="mr-4 w-32" />
           <p className="text-teal-300">Please refresh now.</p>

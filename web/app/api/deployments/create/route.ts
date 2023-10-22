@@ -25,5 +25,5 @@ export async function POST(request: Request) {
     .run();
   console.log(setInitCode.txn);
 
-  return Response.json({ id: "ABC" });
+  return Response.json({ status: "success" });
 }

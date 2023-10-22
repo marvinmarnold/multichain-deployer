@@ -29,6 +29,8 @@ export async function createProject(formData: FormData) {
     .run();
 
   console.log(insert.txn);
+  // await insert.txn?.wait();
+
   //   // Wait for transaction finality
   //   await insert.txn?.wait();
   redirect(`/${id}`); // Navigate to new route

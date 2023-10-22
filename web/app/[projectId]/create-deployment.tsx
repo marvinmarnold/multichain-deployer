@@ -6,9 +6,10 @@ import { utils } from "ethers";
 import { Circles, TailSpin } from "react-loading-icons";
 
 import { Database } from "@tableland/sdk";
+import { useRouter } from "next/navigation";
 import { FC, MutableRefObject, useEffect, useRef, useState } from "react";
 import { useAccount } from "wagmi";
-import { IProjectSchema } from "../interfaces/tableland";
+import { IProjectSchema, PROJECTS_TABLE } from "../interfaces/tableland";
 import { TARGET_CHAINS } from "../lib";
 
 // enum EState {
@@ -20,21 +21,23 @@ import { TARGET_CHAINS } from "../lib";
 
 type IProjectPageProps = { project: IProjectSchema };
 const db: Database<IProjectSchema> = new Database();
-const PROJECTS_TABLE = process.env.NEXT_PUBLIC_TABLELAND_PROJECTS_TABLE!;
 const BYTECODE_REFRESH_MS = 3000;
 
 const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
+  const router = useRouter();
   const [uploadedInitCode, setUploadedInitCode] = useState<undefined | string>(
     undefined,
   );
   const { address, connector, isConnected } = useAccount();
   const [safeAddress, setSafeAddress] = useState<string | undefined>(undefined);
   const [isDeploying, setIsDeploying] = useState(false);
+  const [hardRefresh, setHardRefresh] = useState(false);
   const intervalRef: MutableRefObject<any> = useRef(null);
   const [selectedChains, setSelectedChains] = useState(new Set());
   // const [state, setState] = useState(EState.WAIT_BYTECODE)
   const initCodeToDeploy =
     uploadedInitCode ?? project.next_init_code ?? undefined;
+  const version = project.next_salt + 1;
 
   const chainIds = JSON.stringify(
     Array.from(selectedChains).map((c: any) => parseInt(c)),
@@ -43,6 +46,18 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
     setSafeAddress(address);
   }, [address]);
 
+  // Clear loading state when new deployment saved
+  useEffect(() => {
+    console.log("Version updated");
+    setIsDeploying(false);
+  }, [version]);
+
+  useEffect(() => {
+    if (hardRefresh) {
+      router.push(`/${project.id}`);
+      router.refresh();
+    }
+  }, [hardRefresh]);
   // Poll tableland to see if initcode has been updated
   useEffect(() => {
     // This function fetches the data
@@ -57,8 +72,14 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
         if (!results || !results[0]) return;
         const newProject = results[0];
         console.log(newProject);
-        if (newProject.next_init_code)
+        if (!!newProject.next_init_code)
           setUploadedInitCode(newProject.next_init_code);
+
+        // The value of `project` seems to get stuck to whatever it is when useEffect first mounts
+        // This causes an endless loop after the first update
+        if (project.next_salt !== newProject.next_salt) {
+          setHardRefresh(true);
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
         // Handle errors as needed
@@ -154,13 +175,11 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
 
   const sampleRequestJson = JSON.stringify({ key: project.id, bytecode: "%s" });
 
-  const WaitBytecode = () => {};
-
   if (!safeAddress) return null;
   return (
     <div>
       <p className="text-center text-2xl">Deploy Contract</p>
-      <p className="text-center text-sm">version {project.next_salt + 1}</p>
+      <p className="text-center text-sm">version {version}</p>
       {isDeploying ? (
         <div className="flex flex-row items-center justify-center justify-items-center">
           <Circles className="mr-4 w-8" />
@@ -186,10 +205,9 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
                 @- {process.env.NEXT_PUBLIC_API_HOST}/api/deployments/create
               </code>
             </p>
-            <p className="my-2 text-xl">OR</p>
-            Upload here:
+            <p className="my-2 text-center text-xl">OR</p>
             <form>
-              <div className="flex flex-col space-y-4">
+              <div className="flex flex-col items-center space-y-4">
                 <input
                   id="fileInput"
                   type="file"
@@ -212,7 +230,7 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
               chainSelector(chainId),
             )}
           </li>
-          <li>Deploy</li>
+          <li>Deploy v{project.next_salt}</li>
           {!!initCodeToDeploy ? (
             <div className="space-y-2">
               <form action={recordDeployment} onSubmit={onDeploy}>
@@ -251,7 +269,7 @@ const CreateDeployment: FC<IProjectPageProps> = ({ project }) => {
                   className="w-full rounded-md bg-purple-900 p-6 text-center text-lg"
                   type="submit"
                 >
-                  Deploy #{project.next_salt + 1}
+                  Deploy #{version}
                 </button>
               </form>
 

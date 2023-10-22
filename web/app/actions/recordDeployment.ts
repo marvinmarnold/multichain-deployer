@@ -30,18 +30,6 @@ export async function recordDeployment(formData: FormData) {
   const tx = formData.get("tx")?.toString();
   const chainIds = formData.get("chainIds")?.toString();
 
-  // projects: increase salt, clear next_init_code
-  const { meta: resetProject } = await db
-    .prepare(
-      `UPDATE ${PROJECTS_TABLE} SET next_init_code = null, next_salt = ${
-        deploymentSalt + 1
-      } WHERE id = '${projectId}';`,
-    )
-    .run();
-
-  console.log(resetProject.txn);
-  console.log("Reset project");
-
   const id = uuidv4();
 
   console.log("id: " + id);
@@ -69,6 +57,20 @@ export async function recordDeployment(formData: FormData) {
     .run();
 
   console.log(insertDeployment.txn);
+  // await insertDeployment.txn?.wait();
+
+  // projects: increase salt, clear next_init_code
+  const { meta: resetProject } = await db
+    .prepare(
+      `UPDATE ${PROJECTS_TABLE} SET next_init_code = null, next_salt = ${
+        deploymentSalt + 1
+      } WHERE id = '${projectId}';`,
+    )
+    .run();
+
+  console.log(resetProject.txn);
+  console.log("Reset project");
+
   console.log("Recorded deployment");
   revalidatePath(`/${projectId}`);
 }

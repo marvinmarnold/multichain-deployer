@@ -18,7 +18,7 @@ const Deployment: FC<IDeploymentSchema> = (deployment) => {
     })
     .join(", ");
   return (
-    <tr key={deployment.id} className="font-mono border border-white-500">
+    <tr key={deployment.id} className="font-mono">
       <td className="p-2">{deployment.deployment_salt + 1}</td>
       <td className="p-2">{moment(deployment.created_at_milis).fromNow()}</td>
       <td className="p-2">{deployment.deployed_address}</td>
@@ -34,7 +34,7 @@ const Deployments: FC<IDeploymentsProps> = ({ deployments }) => {
       <p className="text-center text-2xl">Deployment History</p>
       <table className="mt-8 w-full table-auto text-left">
         <thead>
-          <tr className="font-serif border border-white-500">
+          <tr className="font-serif">
             <th className="p-2">#</th>
             <th className="p-2">Deployed at</th>
             <th className="p-2">Address</th>

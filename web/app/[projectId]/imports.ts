@@ -8,6 +8,9 @@ import twitter from "../../public/twitter-favicon.ico";
 import keybase from "../../public/keybase-favicon.ico";
 import reddit from "../../public/reddit-favicon.ico";
 import farcaster from "../../public/farcaster.svg";
+import unstoppabledomains from "../../public/unstoppabledomains-favicon.ico";
+import dot from "../../public/dot.png";
+import rss3 from "../../public/rss3-favicon.ico";
 import sybil from "../../public/verified-48.png";
 import notSybil from "../../public/cross-mark-svgrepo-com.svg";
 
@@ -22,6 +25,9 @@ export {
     keybase,
     reddit,
     farcaster,
+    unstoppabledomains,
+    dot,
+    rss3,
     sybil,
     notSybil,
   };

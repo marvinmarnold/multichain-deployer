@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Data, IdentityRecord, IdentityWithSource, DataSource, Platform } from '../interfaces/nextid';
 import Link from 'next/link';
 import Image from 'next/image';
-import { unknown, lens, github, ethereum, nextid, space_id, twitter, keybase, reddit, farcaster, sybil, notSybil } from "./imports";
+import { unknown, lens, github, ethereum, nextid, space_id, twitter, keybase, reddit, farcaster, unstoppabledomains, dot, rss3, sybil, notSybil } from "./imports";
 
 
 export default function NextidBadges({walletAddress}: { walletAddress: string }) {
@@ -23,6 +23,9 @@ export default function NextidBadges({walletAddress}: { walletAddress: string })
     else if (name == "ethereum") return ethereum;
     else if (name == "space_id") return space_id;
     else if (name == "nextid") return nextid;
+    else if (name == "unstoppabledomains") return unstoppabledomains;
+    else if (name == "dot") return dot;
+    else if (name == "rss3") return rss3;
     else return unknown;
 
   }
@@ -35,6 +38,7 @@ export default function NextidBadges({walletAddress}: { walletAddress: string })
     else if (name == "reddit") return "https://www.reddit.com/user/";
     else if (name == "github") return "https://github.com/";
     else if (name == "space_id") return "https://space.id/search?query=";
+    else if (name == "unstoppabledomains") return "https://unstoppabledomains.com/search?searchTerm=";
     // ethereum with displayName https://web3.bio/sujiyan.eth
     // keybase with displayName https://keybase.io/sujiyan
     else return "https://www.example.com/";

@@ -160,10 +160,60 @@ contract HyperlaneMessageSender is Ownable {
                 msg.sender // refunds go to msg.sender, who paid the msg.value
             );
         }
+
+        // deploy onchain
+        address senderAddress;
+        uint256 salt;
+        bytes memory contractBytecode;
+
+        (senderAddress, salt, contractBytecode) = abi.decode(
+            _message,
+            (address, uint256, bytes)
+        );
+        deploy(salt, contractBytecode);
+        // deploy onchain
+
         emit DispatchMessageForMultipleChains(
             _destinationDomain,
             _recipient,
             _message
         );
+    }
+
+    function deploy(
+        uint256 _salt,
+        bytes memory _byteCode
+    ) internal returns (address) {
+        // Create the contract using the provided bytecode and salt
+        address deployedAddress;
+        assembly {
+            deployedAddress := create2(
+                0,
+                add(_byteCode, 0x20),
+                mload(_byteCode),
+                _salt
+            )
+            if iszero(extcodesize(deployedAddress)) {
+                revert(0, 0)
+            }
+        }
+        return deployedAddress;
+    }
+
+    function getAddress(
+        uint256 _salt,
+        bytes memory _byteCode
+    ) public view returns (address) {
+        // Get a hash concatenating args passed to encodePacked
+        bytes32 hash = keccak256(
+            abi.encodePacked(
+                bytes1(0xff), // 0
+                address(this), // address of factory contract
+                _salt, // a random salt
+                keccak256(_byteCode) // the wallet contract bytecode
+            )
+        );
+        // Cast last 20 bytes of hash to address
+        return address(uint160(uint256(hash)));
     }
 }

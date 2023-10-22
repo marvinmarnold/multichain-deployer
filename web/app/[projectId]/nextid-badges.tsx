@@ -90,13 +90,13 @@ export default function NextidBadges({walletAddress}: { walletAddress: string })
       <div className="flex">
         {
         identities.map((ele: IdentityWithSource) => 
-        <div>
+        <div key={ele?.identity.uuid}>
           {
             ele?.identity?.displayName !== "" &&
             ele?.identity?.platform !== "keybase" && 
             ele?.identity?.platform !== "ethereum" && 
             ele?.identity?.platform !== "nextid" &&
-            <div key={ele?.identity.uuid} className="px-2">
+            <div className="px-2">
               <Link href={convertToUrl(ele?.identity?.platform) + ele?.identity?.identity} target="blank">
                 <div><Image src= { convertToVar(ele?.identity?.platform) } height={24} width={24} alt="nextIimge" /></div>
                 <div>

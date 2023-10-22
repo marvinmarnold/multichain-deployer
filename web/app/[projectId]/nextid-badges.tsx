@@ -88,17 +88,13 @@ export default function NextidBadges({walletAddress}: { walletAddress: string })
           <div key={ele?.identity.uuid} className="mx-2 px-2">
             {
             ele?.identity?.displayName !== "" &&
+            ele?.identity?.platform !== "keybase" && 
+            ele?.identity?.platform !== "ethereum" && 
             <Link href={convertToUrl(ele?.identity?.platform) + ele?.identity?.identity} target="blank">    
               <div><Image src= { convertToVar(ele?.identity?.platform) } height={24} width={24} alt="nextIimge" /></div>
               <div>
                 {
-                (ele?.identity?.platform === "keybase" || ele?.identity?.platform === "ethereum") &&
-                `@${ele?.identity?.displayName}`
-                }
-                {
-                ele?.identity?.platform !== "nextid" && 
-                ele?.identity?.platform !== "keybase" && 
-                ele?.identity?.platform !== "ethereum" && 
+                ele?.identity?.platform !== "nextid" &&
                 `@${ele?.identity?.identity}`
                 }
               </div>

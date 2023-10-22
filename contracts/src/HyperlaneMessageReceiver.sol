@@ -9,7 +9,6 @@ contract HyperlaneMessageReceiver {
         bytes32 sender,
         address deployedContract
     );
-    uint256 salt = 1;
 
     function handle(
         uint32 _origin,
@@ -17,18 +16,16 @@ contract HyperlaneMessageReceiver {
         bytes calldata _message
     ) external payable {
         address senderAddress;
+        uint256 salt;
         bytes memory contractBytecode;
 
-        (senderAddress, contractBytecode) = abi.decode(
+        (senderAddress, salt, contractBytecode) = abi.decode(
             _message,
-            (address, bytes)
+            (address, uint256, bytes)
         );
 
-        // Verify Signature
-        // require(verify(senderAddress, signature, contractBytecode));
         // Deploy Contract using contractBytecode & senderAddress
         address deployedAddress = deploy(salt, contractBytecode);
-        salt += 1;
         emit ReceivedMessage(_origin, _sender, deployedAddress);
     }
 
@@ -71,53 +68,5 @@ contract HyperlaneMessageReceiver {
         );
         // Cast last 20 bytes of hash to address
         return address(uint160(uint256(hash)));
-    }
-
-    function verify(
-        address _signer,
-        bytes memory signedMessage,
-        bytes memory _sign
-    ) internal pure returns (bool) {
-        bytes32 messageHash = getMessageHash(signedMessage);
-        bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
-
-        return recover(ethSignedMessageHash, _sign) == _signer;
-    }
-
-    function getMessageHash(
-        bytes memory signedMessage
-    ) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked((signedMessage)));
-    }
-
-    function getEthSignedMessageHash(
-        bytes32 _messageHash
-    ) public pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    "\x19Ethereum Signed Message:\n32",
-                    _messageHash
-                )
-            );
-    }
-
-    function recover(
-        bytes32 _ethSignedMessageHash,
-        bytes memory _sign
-    ) public pure returns (address) {
-        (bytes32 r, bytes32 s, uint8 v) = _split(_sign);
-        return ecrecover(_ethSignedMessageHash, v, r, s);
-    }
-
-    function _split(
-        bytes memory _sign
-    ) internal pure returns (bytes32 r, bytes32 s, uint8 v) {
-        require(_sign.length == 65, "Invalid Signature length");
-        assembly {
-            r := mload(add(_sign, 32))
-            s := mload(add(_sign, 64))
-            v := byte(0, mload(add(_sign, 96)))
-        }
     }
 }

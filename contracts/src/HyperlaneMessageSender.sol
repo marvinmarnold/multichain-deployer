@@ -7,6 +7,8 @@ pragma solidity ^0.8.9;
 import "./IMailbox.sol";
 import "./IInterchainGasPaymaster.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
+import "openzeppelin-contracts/contracts/utils/Create2.sol";
+import "openzeppelin-contracts/contracts/utils/Address.sol";
 
 // import "forge-std/console.sol";
 
@@ -163,12 +165,12 @@ contract HyperlaneMessageSender is Ownable {
 
         // deploy onchain
         address senderAddress;
-        uint256 salt;
+        bytes32 salt;
         bytes memory contractBytecode;
 
         (senderAddress, salt, contractBytecode) = abi.decode(
             _message,
-            (address, uint256, bytes)
+            (address, bytes32, bytes)
         );
         deploy(salt, contractBytecode);
         // deploy onchain
@@ -181,39 +183,16 @@ contract HyperlaneMessageSender is Ownable {
     }
 
     function deploy(
-        uint256 _salt,
+        bytes32 _salt,
         bytes memory _byteCode
     ) internal returns (address) {
-        // Create the contract using the provided bytecode and salt
-        address deployedAddress;
-        assembly {
-            deployedAddress := create2(
-                0,
-                add(_byteCode, 0x20),
-                mload(_byteCode),
-                _salt
-            )
-            if iszero(extcodesize(deployedAddress)) {
-                revert(0, 0)
-            }
-        }
-        return deployedAddress;
+        return Create2.deploy(0, _salt, _byteCode);
     }
 
     function getAddress(
-        uint256 _salt,
+        bytes32 _salt,
         bytes memory _byteCode
     ) public view returns (address) {
-        // Get a hash concatenating args passed to encodePacked
-        bytes32 hash = keccak256(
-            abi.encodePacked(
-                bytes1(0xff), // 0
-                address(this), // address of factory contract
-                _salt, // a random salt
-                keccak256(_byteCode) // the wallet contract bytecode
-            )
-        );
-        // Cast last 20 bytes of hash to address
-        return address(uint160(uint256(hash)));
+        return Create2.computeAddress(_salt, keccak256(_byteCode));
     }
 }

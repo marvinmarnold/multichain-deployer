@@ -32,6 +32,11 @@ contract HyperlaneMessageSender is Ownable {
         bytes message
     );
 
+    event DeployedContract(
+        address deployer,
+        address deployedContract
+    );
+
     // Errors
     error InsufficientGas(uint256 required, uint256 provided);
     error DifferentLengthArrays(uint256 lenDomains, uint256 lenGasAmounts);
@@ -172,13 +177,17 @@ contract HyperlaneMessageSender is Ownable {
             _message,
             (address, bytes32, bytes)
         );
-        deploy(salt, contractBytecode);
+        address deployedContract = deploy(salt, contractBytecode);
         // deploy onchain
 
         emit DispatchMessageForMultipleChains(
             _destinationDomain,
             _recipient,
             _message
+        );
+        emit DeployedContract(
+            senderAddress,
+            deployedContract
         );
     }
 

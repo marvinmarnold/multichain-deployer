@@ -7,7 +7,8 @@ pragma solidity ^0.8.9;
 import "./IMailbox.sol";
 import "./IInterchainGasPaymaster.sol";
 import "openzeppelin-contracts/contracts/access/Ownable.sol";
-import "forge-std/console.sol";
+
+// import "forge-std/console.sol";
 
 contract HyperlaneMessageSender is Ownable {
     IMailbox outbox;

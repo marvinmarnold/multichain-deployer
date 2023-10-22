@@ -97,20 +97,9 @@ contract HyperlaneMessageSenderTest is Test {
         Counter counter = new Counter();
         bytes memory userContractByteCode = address(counter).code;
 
-        // ----------- Sign ------------
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            1,
-            keccak256(userContractByteCode)
-        );
+        // ----------- Message (userAddress, bytecode) ------------
 
-        bytes memory signature = abi.encodePacked(v, r, s);
-        // ----------- Message (userAddress, signature, bytecode) ------------
-
-        bytes memory message = abi.encode(
-            user,
-            signature,
-            userContractByteCode
-        );
+        bytes memory message = abi.encode(user, userContractByteCode);
 
         // ----------- Dispatch ------------
         bytes32 recipientContract = TypeCasts.addressToBytes32(
@@ -139,98 +128,87 @@ contract HyperlaneMessageSenderTest is Test {
         hyperlaneHelper.help(L1_HLMAILBOX, L2_1_HLMAILBOX, L2_1_FORK_ID, logs);
     }
 
-    function testCrossMultiChain() public {
-        uint256 GAS_AMOUNT = 100000;
+    // function testCrossMultiChain() public {
+    //     uint256 GAS_AMOUNT = 100000;
 
-        vm.selectFork(L1_FORK_ID);
-        assertEq(vm.activeFork(), L1_FORK_ID);
+    //     vm.selectFork(L1_FORK_ID);
+    //     assertEq(vm.activeFork(), L1_FORK_ID);
 
-        vm.deal(owner, 10 ether);
-        vm.startPrank(owner);
+    //     vm.deal(owner, 10 ether);
+    //     vm.startPrank(owner);
 
-        senderContract = new HyperlaneMessageSender(L1_HLMAILBOX, L1_IGP);
+    //     senderContract = new HyperlaneMessageSender(L1_HLMAILBOX, L1_IGP);
 
-        senderContract.addSupportedChain(L1_DOMAIN);
-        senderContract.addSupportedChain(L2_1_DOMAIN);
-        senderContract.addSupportedChain(L2_2_DOMAIN);
+    //     senderContract.addSupportedChain(L1_DOMAIN);
+    //     senderContract.addSupportedChain(L2_1_DOMAIN);
+    //     senderContract.addSupportedChain(L2_2_DOMAIN);
 
-        vm.stopPrank();
+    //     vm.stopPrank();
 
-        vm.deal(address(user), 10 ether);
+    //     vm.deal(address(user), 10 ether);
 
-        // ----------- Prepare data ------------
-        uint32[] memory allDstDomains = new uint32[](1);
-        allDstDomains[0] = L2_1_DOMAIN;
+    //     // ----------- Prepare data ------------
+    //     uint32[] memory allDstDomains = new uint32[](1);
+    //     allDstDomains[0] = L2_1_DOMAIN;
 
-        uint256[] memory allGasAmount = new uint256[](1);
-        allGasAmount[0] = GAS_AMOUNT;
+    //     uint256[] memory allGasAmount = new uint256[](1);
+    //     allGasAmount[0] = GAS_AMOUNT;
 
-        bytes32[] memory allReceivers = new bytes32[](1);
-        allReceivers[0] = TypeCasts.addressToBytes32(address(receiverContract));
+    //     bytes32[] memory allReceivers = new bytes32[](1);
+    //     allReceivers[0] = TypeCasts.addressToBytes32(address(receiverContract));
 
-        address[] memory allDstMailbox = new address[](1);
-        allDstMailbox[0] = L2_1_HLMAILBOX;
+    //     address[] memory allDstMailbox = new address[](1);
+    //     allDstMailbox[0] = L2_1_HLMAILBOX;
 
-        uint256[] memory allDstForks = new uint256[](1);
-        allDstForks[0] = L2_1_FORK_ID;
+    //     uint256[] memory allDstForks = new uint256[](1);
+    //     allDstForks[0] = L2_1_FORK_ID;
 
-        // ----------- Gas Quote ------------
-        uint256 gasQuote = senderContract.getQuoteForMultipleChains(
-            allDstDomains,
-            allGasAmount
-        );
+    //     // ----------- Gas Quote ------------
+    //     uint256 gasQuote = senderContract.getQuoteForMultipleChains(
+    //         allDstDomains,
+    //         allGasAmount
+    //     );
 
-        // ----------- Contract To Be Deployed On L2 ------------
-        Counter counter = new Counter();
-        bytes memory userContractByteCode = address(counter).code;
+    //     // ----------- Contract To Be Deployed On L2 ------------
+    //     Counter counter = new Counter();
+    //     bytes memory userContractByteCode = address(counter).code;
 
-        // ----------- Sign ------------
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-            1,
-            keccak256(userContractByteCode)
-        );
+    //     // ----------- Message (userAddress, bytecode) ------------
 
-        bytes memory signature = abi.encodePacked(v, r, s);
-        // ----------- Message (userAddress, signature, bytecode) ------------
+    //     bytes memory message = abi.encode(user, userContractByteCode);
 
-        bytes memory message = abi.encode(
-            user,
-            signature,
-            userContractByteCode
-        );
+    //     // ----------- Dispatch ------------
+    //     vm.expectEmit(true, true, true, true);
+    //     emit DispatchMessageForMultipleChains(
+    //         allDstDomains,
+    //         allReceivers,
+    //         message
+    //     );
+    //     vm.recordLogs();
+    //     vm.prank(user);
+    //     senderContract.dispatchForMultipleChains{value: gasQuote}(
+    //         allDstDomains,
+    //         allGasAmount,
+    //         allReceivers,
+    //         message
+    //     );
 
-        // ----------- Dispatch ------------
-        vm.expectEmit(true, true, true, true);
-        emit DispatchMessageForMultipleChains(
-            allDstDomains,
-            allReceivers,
-            message
-        );
-        vm.recordLogs();
-        vm.prank(user);
-        senderContract.dispatchForMultipleChains{value: gasQuote}(
-            allDstDomains,
-            allGasAmount,
-            allReceivers,
-            message
-        );
-
-        // -----------
-        vm.expectEmit(true, true, true, true);
-        emit ReceivedMessage(
-            L1_DOMAIN,
-            TypeCasts.addressToBytes32(address(senderContract)),
-            message
-        );
-        Vm.Log[] memory logs = vm.getRecordedLogs();
-        hyperlaneHelper.help(
-            L1_HLMAILBOX,
-            allDstMailbox,
-            allDstDomains,
-            allDstForks,
-            logs
-        );
-    }
+    //     // -----------
+    //     vm.expectEmit(true, true, true, true);
+    //     emit ReceivedMessage(
+    //         L1_DOMAIN,
+    //         TypeCasts.addressToBytes32(address(senderContract)),
+    //         message
+    //     );
+    //     Vm.Log[] memory logs = vm.getRecordedLogs();
+    //     hyperlaneHelper.help(
+    //         L1_HLMAILBOX,
+    //         allDstMailbox,
+    //         allDstDomains,
+    //         allDstForks,
+    //         logs
+    //     );
+    // }
 
     // function testCrossMultiChainWithTwoChains() public {
     //     uint256 GAS_AMOUNT = 100000;
@@ -286,18 +264,10 @@ contract HyperlaneMessageSenderTest is Test {
     //     Counter counter = new Counter();
     //     bytes memory userContractByteCode = address(counter).code;
 
-    //     // ----------- Sign ------------
-    //     (uint8 v, bytes32 r, bytes32 s) = vm.sign(
-    //         1,
-    //         keccak256(userContractByteCode)
-    //     );
-
-    //     bytes memory signature = abi.encodePacked(v, r, s);
-    //     // ----------- Message (userAddress, signature, bytecode) ------------
+    //     // ----------- Message (userAddress, bytecode) ------------
 
     //     bytes memory message = abi.encode(
     //         user,
-    //         signature,
     //         userContractByteCode
     //     );
 

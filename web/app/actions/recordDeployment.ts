@@ -29,13 +29,14 @@ export async function recordDeployment(formData: FormData) {
   const deployedBy = formData.get("deployedBy")?.toString();
   const tx = formData.get("tx")?.toString();
   const chainIds = formData.get("chainIds")?.toString();
+  const deployedAddress = formData.get("deployedAddress")?.toString();
 
   const id = uuidv4();
-
   console.log("id: " + id);
   console.log("projectId: " + projectId);
   console.log("deploymentSalt: " + deploymentSalt);
   console.log("deployedBy: " + deployedBy);
+  console.log("deployedAddress: " + deployedAddress);
   console.log("createdAtMilis: " + createdAtMilis);
   console.log("tx: " + tx);
   console.log("chainIds: " + chainIds);
@@ -48,7 +49,7 @@ export async function recordDeployment(formData: FormData) {
       id,
       projectId,
       deploymentSalt,
-      "todo",
+      deployedAddress,
       deployedBy,
       createdAtMilis,
       tx,

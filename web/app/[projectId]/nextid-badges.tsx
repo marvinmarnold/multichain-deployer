@@ -76,32 +76,33 @@ export default function NextidBadges({walletAddress}: { walletAddress: string })
   return (
   <div className="font-serif text-center">
     <div className="flex">
-      Sybil:
+      Sybil Verified:
+      <Link href="https://github.com/Uniswap/sybil-list/blob/master/verified.json" target="blank">
       <div className="py-0 px-1"><Image src= { sybilCheck() } height={30} width={30} alt="sybil check" /></div>
+      </Link>
     </div>
     <div className="flex">
       <div>Platforms:</div>
       <div className="flex">
         {
         identities.map((ele: IdentityWithSource) => 
-        
-          <div key={ele?.identity.uuid} className="mx-2 px-2">
-            {
+        <div>
+          {
             ele?.identity?.displayName !== "" &&
             ele?.identity?.platform !== "keybase" && 
             ele?.identity?.platform !== "ethereum" && 
-            <Link href={convertToUrl(ele?.identity?.platform) + ele?.identity?.identity} target="blank">    
-              <div><Image src= { convertToVar(ele?.identity?.platform) } height={24} width={24} alt="nextIimge" /></div>
-              <div>
-                {
-                ele?.identity?.platform !== "nextid" &&
-                `@${ele?.identity?.identity}`
-                }
-              </div>
-              {/* <div>{ele?.identity?.platform}</div> */}
-            </Link>}
-          </div>
-          
+            ele?.identity?.platform !== "nextid" &&
+            <div key={ele?.identity.uuid} className="px-2">
+              <Link href={convertToUrl(ele?.identity?.platform) + ele?.identity?.identity} target="blank">
+                <div><Image src= { convertToVar(ele?.identity?.platform) } height={24} width={24} alt="nextIimge" /></div>
+                <div>
+                  {`@${ele?.identity?.identity}`}
+                </div>
+                {/* <div>{ele?.identity?.platform}</div> */}
+              </Link>
+            </div>
+          }
+        </div>
         )
         }
       </div>

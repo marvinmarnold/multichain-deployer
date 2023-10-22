@@ -39,7 +39,7 @@ export async function POST(request: Request, response: Response) {
 
       const returndata = await getUserData(walletAddress);
       // const returndata = await getUserData("0x934b510d4c9103e6a87aef13b816fb080286d649");
-      console.log("returning from nextid api", returndata);
+      // console.log("returning from nextid api", returndata);
 
     return NextResponse.json(returndata);
 }

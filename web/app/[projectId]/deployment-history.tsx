@@ -19,45 +19,28 @@ const Deployment: FC<IDeploymentSchema> = (deployment) => {
     .join(", ");
   return (
     <tr key={deployment.id} className="font-mono border border-white-500">
-      <td>{deployment.deployment_salt + 1}</td>
-      <td>{moment(deployment.created_at_milis).fromNow()}</td>
-      <td>{deployment.deployed_address}</td>
-      <td>{deployment.deployed_by}
-      <NextidBadges walletAddress={deployment.deployed_by}/>
-      {/* <table className="mt-8 w-full table-auto text-left">
-        <thead>
-          <tr className="font-serif">
-          <th>Sybil</th>
-          <th>Platforms</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr key={deployment.id} className="font-mono">
-          <td>sybil status</td>
-          <td>platoform icon</td>
-          </tr>
-          </tbody>
-      </table> */}
-      </td>
-      <td>{chains}</td>
+      <td className="px-2">{deployment.deployment_salt + 1}</td>
+      <td className="px-2">{moment(deployment.created_at_milis).fromNow()}</td>
+      <td className="px-2">{deployment.deployed_address}</td>
+      <td className="px-2">{deployment.deployed_by}{""}<NextidBadges walletAddress={deployment.deployed_by}/></td>
+      <td className="px-2">{chains}</td>
     </tr>
   );
 };
 
 const Deployments: FC<IDeploymentsProps> = ({ deployments }) => {
-  console.table(deployments);
   return (
     <div className="w-full">
       <p className="text-center text-2xl">Deployment History</p>
       <table className="mt-8 w-full table-auto text-left">
         <thead>
           <tr className="font-serif border border-white-500">
-            <th>#</th>
-            <th>Deployed at</th>
-            <th>Address</th>
-            <th>Deployer</th>
-            <th>Chains</th>
-            <th>Tx</th>
+            <th className="px-2">#</th>
+            <th className="px-2">Deployed at</th>
+            <th className="px-2">Address</th>
+            <th className="px-2">Deployer</th>
+            <th className="px-2">Chains</th>
+            <th className="px-2">Tx</th>
           </tr>
         </thead>
         {!!deployments && deployments.length > 0 ? (

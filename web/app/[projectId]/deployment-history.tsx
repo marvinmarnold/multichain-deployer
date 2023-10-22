@@ -4,6 +4,7 @@ import moment from "moment";
 import { FC } from "react";
 import { IDeploymentSchema } from "../interfaces/tableland";
 import { TARGET_CHAINS } from "../lib";
+import NextidBadges from "./nextid-badges";
 
 type IDeploymentsProps = {
   deployments: IDeploymentSchema[];
@@ -21,7 +22,7 @@ const Deployment: FC<IDeploymentSchema> = (deployment) => {
       <td>{deployment.deployment_salt + 1}</td>
       <td>{moment(deployment.created_at_milis).fromNow()}</td>
       <td>{deployment.deployed_address}</td>
-      <td>{deployment.deployed_by}</td>
+      <td>{deployment.deployed_by}<NextidBadges walletAddress={deployment.deployed_by}/></td>
       <td>{chains}</td>
     </tr>
   );

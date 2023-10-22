@@ -16,6 +16,8 @@
     "eslint-plugin-tailwindcss": "^3.13.0",
     "eslint-plugin-unused-imports": "^3.0.0",
     "ethers": "^5.7.2",
+    "graphql": "^16.8.1",
+    "graphql-request": "^6.1.0",
     "lokijs": "^1.5.12",
     "moment": "^2.29.4",
     "next": "^13.5.6",

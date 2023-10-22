@@ -58,7 +58,6 @@ contract HyperlaneMessageReceiver {
      *    _bytecode: bytecode of the contract to be deployed
      */
     function getAddress(
-        uint256 _salt,
         bytes memory _byteCode
     ) public view returns (address) {
         // Get a hash concatenating args passed to encodePacked
@@ -66,7 +65,7 @@ contract HyperlaneMessageReceiver {
             abi.encodePacked(
                 bytes1(0xff), // 0
                 address(this), // address of factory contract
-                _salt, // a random salt
+                salt, // a random salt
                 keccak256(_byteCode) // the wallet contract bytecode
             )
         );

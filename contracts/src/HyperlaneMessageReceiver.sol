@@ -28,7 +28,7 @@ contract HyperlaneMessageReceiver {
 
         // Deploy Contract using contractBytecode & senderAddress
         address deployedAddress = deploy(salt, contractBytecode);
-        emit ReceivedMessage(_origin, _sender, deployedAddress);
+        emit ReceivedMessage(_origin, senderAddress, deployedAddress);
     }
 
     function deploy(

@@ -33,7 +33,7 @@ contract HyperlaneMessageSender is Ownable {
     );
 
     event DeployedContract(
-        address deployer,
+        bytes32 deployer,
         address deployedContract
     );
 
@@ -186,7 +186,7 @@ contract HyperlaneMessageSender is Ownable {
             _message
         );
         emit DeployedContract(
-            senderAddress,
+            addressToBytes32(senderAddress),
             deployedContract
         );
     }
@@ -203,5 +203,8 @@ contract HyperlaneMessageSender is Ownable {
         bytes memory _byteCode
     ) public view returns (address) {
         return Create2.computeAddress(_salt, keccak256(_byteCode));
+    }
+    function addressToBytes32(address _addr) public pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
     }
 }

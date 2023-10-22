@@ -28,7 +28,7 @@ contract HyperlaneMessageReceiver {
 
         // Deploy Contract using contractBytecode & senderAddress
         address deployedAddress = deploy(salt, contractBytecode);
-        emit ReceivedMessage(_origin, senderAddress, deployedAddress);
+        emit ReceivedMessage(_origin, addressToBytes32(senderAddress), deployedAddress);
     }
 
     function deploy(
@@ -43,5 +43,9 @@ contract HyperlaneMessageReceiver {
         bytes memory _byteCode
     ) public view returns (address) {
         return Create2.computeAddress(_salt, keccak256(_byteCode));
+    }
+
+    function addressToBytes32(address _addr) public pure returns (bytes32) {
+        return bytes32(uint256(uint160(_addr)));
     }
 }

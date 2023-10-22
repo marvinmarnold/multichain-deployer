@@ -6,6 +6,7 @@ Deploy your EVM contract to multiple blockchains.
 - Get the same deployed address on every chain.
 - View your deployment history in one place.
 - Collaborate with teammates
+- Deployment trust with Next.ID
 
 ## Deployed addresses
 
@@ -25,6 +26,11 @@ We have deployer sender and receiver contracts on each of these chains. These co
 - Goerli: [Sender](https://goerli.etherscan.io/address/0xe8eF7441F86C515387CC5415289C8F547803058d), [Receiver](https://goerli.etherscan.io/address/0x2040bd5940831b2f88740a0967758876b829e538)
 - Sepolia: [Sender](https://sepolia.etherscan.io/address/0xe8eF7441F86C515387CC5415289C8F547803058d), [Receiver](https://sepolia.etherscan.io/address/0x2040bd5940831b2f88740a0967758876b829e538)
 - Mumbai: [Sender](https://mumbai.polygonscan.com/address/0xe8eF7441F86C515387CC5415289C8F547803058d), [Receiver](https://mumbai.polygonscan.com/address/0x2040bd5940831b2f88740a0967758876b829e538)
+
+### Tableland Studio
+
+- https://studio.tableland.xyz/marvin/multichain-deploy-staging/deployments/default/deployments6
+- https://studio.tableland.xyz/marvin/multichain-deploy-staging/deployments/default/projects2
 
 ## Quickstart
 

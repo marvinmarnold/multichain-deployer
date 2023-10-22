@@ -30,7 +30,20 @@ We have deployer sender and receiver contracts on each of these chains. These co
 ### Tableland Studio
 
 - https://studio.tableland.xyz/marvin/multichain-deploy-staging/deployments/default/deployments6
+  Deployed to
+  optimism-goerli-staging
+  Tableland Table
+  deployments6_420_34
+  Token ID
+  34
+
 - https://studio.tableland.xyz/marvin/multichain-deploy-staging/deployments/default/projects2
+  Deployed to
+  optimism-goerli-staging
+  Tableland Table
+  projects2_420_29
+  Token ID
+  29
 
 ## Quickstart
 

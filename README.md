@@ -22,7 +22,7 @@ We have deployer sender and receiver contracts on each of these chains. These co
 
 - Scroll Sepolia: [Sender](https://sepolia.scrollscan.dev/address/0xD96eD5D45bA2A5f846605f6cC250DEAc244B99D4), [Receiver](https://sepolia.scrollscan.dev/address/0x4374db7ef1a32cef53ab81cb31eac65f89b5f2e1)
 - Polygon ZK Testnet: [Sender](https://testnet-zkevm.polygonscan.com/address/0x4374db7ef1a32cef53ab81cb31eac65f89b5f2e1), [Receiver](https://testnet-zkevm.polygonscan.com/address/0xd96ed5d45ba2a5f846605f6cc250deac244b99d4)
-- Mantle: [Sender](https://explorer.testnet.mantle.xyz/address/0xD96eD5D45bA2A5f846605f6cC250DEAc244B99D4), [Receiver](https://explorer.testnet.mantle.xyz/address/0x4374db7eF1A32Cef53AB81CB31eAC65f89B5F2e1)
+- Mantle: [Twitter](https://twitter.com/gr8h_/status/1716342332100907225), [Sender](https://explorer.testnet.mantle.xyz/address/0xD96eD5D45bA2A5f846605f6cC250DEAc244B99D4), [Receiver](https://explorer.testnet.mantle.xyz/address/0x4374db7eF1A32Cef53AB81CB31eAC65f89B5F2e1)
 - Goerli: [Sender](https://goerli.etherscan.io/address/0xe8eF7441F86C515387CC5415289C8F547803058d), [Receiver](https://goerli.etherscan.io/address/0x2040bd5940831b2f88740a0967758876b829e538)
 - Sepolia: [Sender](https://sepolia.etherscan.io/address/0xe8eF7441F86C515387CC5415289C8F547803058d), [Receiver](https://sepolia.etherscan.io/address/0x2040bd5940831b2f88740a0967758876b829e538)
 - Mumbai: [Sender](https://mumbai.polygonscan.com/address/0xe8eF7441F86C515387CC5415289C8F547803058d), [Receiver](https://mumbai.polygonscan.com/address/0x2040bd5940831b2f88740a0967758876b829e538)
